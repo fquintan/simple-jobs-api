@@ -1,2 +1,2 @@
 # simple-jobs-api
-A simple josb api to help me schedule distributed batch jobs
+A simple jobs api to help me schedule distributed batch jobs
