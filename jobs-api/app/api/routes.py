@@ -75,3 +75,29 @@ def clear_all():
     Job.query.delete()
     db.session.commit()
     return jsonify([])
+
+
+@app.route('/status/')
+def status_all():
+    jobs = Job.query.all()
+    if jobs is None:
+        return []
+    resp = {}
+    for job in jobs:
+        resp[job.id] = {
+            'status': job.status.value
+        }
+    return jsonify(resp)
+
+
+@app.route('/status/<int:index>')
+def status(index):
+    job = Job.query.get(index)
+    if job is None:
+        return []
+    resp = {
+        'id': job.id,
+        'status': job.status.value
+    }
+    return jsonify(resp)
+
