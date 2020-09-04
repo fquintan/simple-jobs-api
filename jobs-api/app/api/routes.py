@@ -2,16 +2,21 @@ from app import app, db
 from flask import jsonify
 from app.models.Job import Job, JobStatus
 from flask_sqlalchemy import functools
+import uuid
+from datetime import datetime
 
 @app.route('/get_jobs/<int:amount>')
 def get_jobs(amount):
     jobs = Job.query.filter_by(status=JobStatus.PENDING).limit(amount).all()
     if jobs is None:
-        return jsonify([])
-    resp = []
+        return jsonify({})
+    resp = {}
+    machine_id = str(uuid.uuid4())
     for job in jobs:
-        job.status = JobStatus.DOING 
-        resp.append(job.id)
+        job.status = JobStatus.DOING
+        job.machine = machine_id
+        job.last_modified = datetime.utcnow()
+        resp[job.id] = job.serialize()
     db.session.commit()
     return jsonify(resp)
 
@@ -20,35 +25,37 @@ def get_jobs(amount):
 def job_done(index):
     job = Job.query.get(index)
     if job is None:
-        return jsonify([])
+        return jsonify({})
     if job.status == JobStatus.DOING:
         job.status = JobStatus.DONE
+        job.last_modified = datetime.utcnow()
         db.session.commit()
-        return "Job done"
-    else:
-        return "Job was not running"
 
-    return jsonify([])
+    return jsonify(job.serialize())
 
 
 @app.route('/job_retry/<int:index>')
 def job_retry(index):
     job = Job.query.get(index)
     if job is None:
-        return jsonify([])
+        return jsonify({})
     job.status = JobStatus.PENDING
+    job.last_modified = datetime.utcnow()
+    job.machine = ''
     db.session.commit()
-    return jsonify(job.id)
+    return jsonify(job.sereialize())
 
 @app.route('/release_all/')
 def job_release():
     jobs = Job.query.filter_by(status=JobStatus.DOING)
     if jobs is None:
-        return jsonify([])
-    resp = []
+        return jsonify({})
+    resp = {}
     for job in jobs:
-        resp.append(job.id)
         job.status = JobStatus.PENDING
+        job.last_modified = datetime.utcnow()
+        job.machine = ''
+        resp[job.id] = job.serialize()
     db.session.commit()
     return jsonify(resp)
 
@@ -62,7 +69,13 @@ def create_jobs(amount):
         max_id = job.id + 1
     resp = []
     for i in range(amount):
-        job = Job(id=(max_id+i), instruction='', status=JobStatus.PENDING)
+        job = Job(
+            id=(max_id+i),
+            instruction='',
+            status=JobStatus.PENDING,
+            last_modified = datetime.utcnow(),
+            machine = ''
+        )
         db.session.add(job)
         resp.append(max_id+i)
     db.session.commit()
@@ -74,19 +87,17 @@ def create_jobs(amount):
 def clear_all():
     Job.query.delete()
     db.session.commit()
-    return jsonify([])
+    return jsonify({})
 
 
 @app.route('/status/')
 def status_all():
     jobs = Job.query.all()
     if jobs is None:
-        return []
+        return jsonify({})
     resp = {}
     for job in jobs:
-        resp[job.id] = {
-            'status': job.status.value
-        }
+        resp[job.id] = job.serialize()
     return jsonify(resp)
 
 
@@ -94,10 +105,7 @@ def status_all():
 def status(index):
     job = Job.query.get(index)
     if job is None:
-        return []
-    resp = {
-        'id': job.id,
-        'status': job.status.value
-    }
-    return jsonify(resp)
+        return jsonify({})
+    
+    return jsonify(job.serialize())
 
