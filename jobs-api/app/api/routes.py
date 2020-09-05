@@ -43,7 +43,8 @@ def job_retry(index):
     job.last_modified = datetime.utcnow()
     job.machine = ''
     db.session.commit()
-    return jsonify(job.sereialize())
+    return jsonify(job.serialize())
+
 
 @app.route('/release_all/')
 def job_release():
