@@ -38,6 +38,7 @@
           <table class="table table-hover">
             <thead>
               <tr>
+                <th scope="col">Id</th>
                 <th scope="col">Instruction</th>
                 <th scope="col">Status</th>
                 <th scope="col">Machine</th>
@@ -48,6 +49,7 @@
             </thead>
             <tbody>
               <tr v-for="job in jobs_doing">
+                <td>[[ job.id ]]</td>
                 <td>[[ job.instruction ]]</td>
                 <td>[[ job.status ]]</td>
                 <td>[[ job.machine_id ]]</td>
@@ -55,8 +57,8 @@
                 <td>[[ job.last_modified ]]</td>
                 <td>
                   <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-warning btn-sm">Update</button>
-                    <button type="button" class="btn btn-danger btn-sm">Delete</button>
+                    <button v-on:click="retry(job.id)" type="button" class="btn btn-warning btn-sm">Release</button>
+                    <button v-on:click="delete_job(job.id)" type="button" class="btn btn-danger btn-sm">Delete</button>
                   </div>
                 </td>
               </tr>
@@ -68,6 +70,7 @@
           <table class="table table-hover">
             <thead>
               <tr>
+                <th scope="col">Id</th>
                 <th scope="col">Instruction</th>
                 <th scope="col">Status</th>
                 <th scope="col">Last Modified</th>
@@ -76,12 +79,13 @@
             </thead>
             <tbody>
               <tr v-for="job in jobs_pending">
+                <td>[[ job.id ]]</td>
                 <td>[[ job.instruction ]]</td>
                 <td>[[ job.status ]]</td>
                 <td>[[ job.last_modified ]]</td>
                 <td>
                   <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-danger btn-sm">Delete</button>
+                    <button v-on:click="delete_job(job.id)" type="button" class="btn btn-danger btn-sm">Delete</button>
                   </div>
                 </td>
               </tr>
@@ -92,6 +96,7 @@
           <table class="table table-hover">
             <thead>
               <tr>
+                <th scope="col">Id</th>
                 <th scope="col">Instruction</th>
                 <th scope="col">Status</th>
                 <th scope="col">Machine</th>
@@ -101,14 +106,14 @@
             </thead>
             <tbody>
               <tr v-for="job in jobs_done">
+                <td>[[ job.id ]]</td>
                 <td>[[ job.instruction ]]</td>
                 <td>[[ job.status ]]</td>
                 <td>[[ job.machine_id ]]</td>
                 <td>[[ job.last_modified ]]</td>
                 <td>
                   <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-warning btn-sm">Update</button>
-                    <button type="button" class="btn btn-danger btn-sm">Delete</button>
+                    <button v-on:click="delete_job(job.id)" type="button" class="btn btn-danger btn-sm">Delete</button>
                   </div>
                 </td>
               </tr>

@@ -111,6 +111,16 @@ def status(index):
     return jsonify(job.serialize())
 
 
+@app.route('/delete/<int:index>')
+def delete(index):
+    job = Job.query.get(index)
+    if job is None:
+        return jsonify({})
+    job_id = job.id
+    db.session.delete(job)
+    db.session.commit()
+    return str(job_id)
+
 @app.route('/')
 def index():
     return render_template('index.html', **{"greeting": "Hello from Flask!"})
