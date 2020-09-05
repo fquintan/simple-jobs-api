@@ -1,5 +1,5 @@
 from app import app, db
-from flask import jsonify
+from flask import jsonify, render_template
 from app.models.Job import Job, JobStatus
 from flask_sqlalchemy import functools
 import uuid
@@ -109,3 +109,7 @@ def status(index):
     
     return jsonify(job.serialize())
 
+
+@app.route('/')
+def index():
+    return render_template('index.html', **{"greeting": "Hello from Flask!"})

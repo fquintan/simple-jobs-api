@@ -1,8 +1,11 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
+
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 DB_USER = os.environ.get('DB_USER', '<db_user>')
 DB_PASS = os.environ.get('DB_PASS', '<db_pass>')
