@@ -1,5 +1,5 @@
 from app import app, db
-from flask import jsonify, render_template
+from flask import jsonify, render_template, request
 from app.models.Job import Job, JobStatus
 from flask_sqlalchemy import functools
 import uuid
@@ -11,7 +11,7 @@ def get_jobs(amount):
     if jobs is None:
         return jsonify({})
     resp = {}
-    machine_id = str(uuid.uuid4())
+    machine_id = request.args.get('machine', str(uuid.uuid4()))
     for job in jobs:
         job.status = JobStatus.DOING
         job.machine = machine_id
