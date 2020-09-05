@@ -61,24 +61,22 @@ def job_release():
     return jsonify(resp)
 
 
-@app.route('/create_jobs/<int:amount>')
-def create_jobs(amount):
-    job = Job.query.order_by(Job.id.desc()).first()
-    if job is None:
-        max_id = 0
-    else:
-        max_id = job.id + 1
-    resp = []
-    for i in range(amount):
+@app.route('/create_jobs/', methods=['POST'])
+def create_jobs():
+    instructions = request.form.get('instructions', '')
+    lines = str(instructions).split('\n')
+    resp = {}
+    for line in lines:
+        if len(line) == 0:
+            continue
         job = Job(
-            id=(max_id+i),
-            instruction='',
-            status=JobStatus.PENDING,
+            instruction = line,
+            status = JobStatus.PENDING,
             last_modified = datetime.utcnow(),
-            machine = ''
-        )
+            machine = '')
         db.session.add(job)
-        resp.append(max_id+i)
+        db.session.flush()
+        resp[job.id] = job.serialize()
     db.session.commit()
     return jsonify(resp)
 

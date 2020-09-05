@@ -10,7 +10,7 @@ class JobStatus(enum.Enum):
 	DONE = 'DONE'
 
 class Job(db.Model):
-	id = db.Column(db.Integer, primary_key=True, autoincrement=False)
+	id = db.Column(db.Integer, primary_key=True)
 	instruction = db.Column(db.String(255), nullable=False)
 	status = db.Column(db.Enum(JobStatus), nullable=False)
 	last_modified = db.Column(db.DateTime , nullable=False, default=datetime.utcnow)
