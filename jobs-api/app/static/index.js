@@ -99,6 +99,31 @@ const vm = new Vue({ // Again, vm is our Vue instance's name for consistency.
 				this.percentage['pending'] = this.counts['pending'] * 100 / this.counts['total'];
 		      }
 			}, (error) => {console.log('error')})
+		  },
+		  add_jobs: function() {
+			  console.log($('#add-form-instructions').val());
+			  var formData = new FormData();
+			  formData.append('instructions', $('#add-form-instructions').val())
+			  axios({
+				  method: 'post',
+				  url: API_URL + '/create_jobs/',
+				  data: formData
+			  }).then((response) => {
+				const jobs = response.data;
+				for (const job_id in jobs) {
+					if (jobs.hasOwnProperty(job_id)) {
+						const job = jobs[job_id];
+						this.$set(this.jobs_pending, job_id, job);
+						this.counts['pending']++;
+						this.counts['total']++;
+					}
+				}
+				this.percentage['doing'] = this.counts['doing'] * 100 / this.counts['total'];
+				this.percentage['done'] = this.counts['done'] * 100 / this.counts['total'];
+				this.percentage['pending'] = this.counts['pending'] * 100 / this.counts['total'];
+
+			  }, 
+			  (error) => (console.log(error)))
 		  }
 	  }
 })
