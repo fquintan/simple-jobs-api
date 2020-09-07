@@ -28,7 +28,10 @@ def job_done(index):
         return jsonify({})
     if job.status == JobStatus.DOING:
         job.status = JobStatus.DONE
-        job.last_modified = datetime.utcnow()
+        now = datetime.utcnow()
+        runtime = (now - job.last_modified).total_seconds()
+        job.runtime = runtime
+        job.last_modified = now
         db.session.commit()
 
     return jsonify(job.serialize())
@@ -70,7 +73,7 @@ def create_jobs():
         if len(line) == 0:
             continue
         job = Job(
-            instruction = line,
+            instruction = line.strip(),
             status = JobStatus.PENDING,
             last_modified = datetime.utcnow(),
             machine = '')

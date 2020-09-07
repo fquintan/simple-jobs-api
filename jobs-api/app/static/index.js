@@ -33,16 +33,23 @@ const vm = new Vue({ // Again, vm is our Vue instance's name for consistency.
 						  hours = Math.floor(runtime / 3600);
 						  minutes = Math.floor((runtime - (hours * 3600)) / 60);
 						  seconds = runtime - (hours * 3600) - (minutes * 60);
-
+						  
 						  job.runtime = hours.toString().padStart(2, '0') + ':' + 
-							minutes.toString().padStart(2, '0') + ':' + 
-							seconds.toString().padStart(2, '0');
-			
+						  minutes.toString().padStart(2, '0') + ':' + 
+						  seconds.toString().padStart(2, '0');
+						  
 						  this.jobs_doing[job.id] = job;
 						  this.counts['doing']++;
-					  }
-					  else if (job.status == 'DONE') {
-						  this.jobs_done[job.id] = job;
+						}
+						else if (job.status == 'DONE') {
+							hours = Math.floor(job.runtime / 3600)
+							minutes = Math.floor((job.runtime - (hours * 3600)) / 60);
+							seconds = job.runtime - (hours * 3600) - (minutes * 60);
+							job.runtime = hours.toString().padStart(2, '0') + ':' + 
+							minutes.toString().padStart(2, '0') + ':' + 
+							seconds.toString().padStart(2, '0');
+							this.jobs_done[job.id] = job;
+  
 						  this.counts['done']++;
 					}
 					  else if (job.status == 'PENDING') {

@@ -14,6 +14,7 @@ class Job(db.Model):
 	instruction = db.Column(db.String(255), nullable=False)
 	status = db.Column(db.Enum(JobStatus), nullable=False)
 	last_modified = db.Column(db.DateTime , nullable=False, default=datetime.utcnow)
+	runtime = db.Column(db.Integer, nullable=False, default=0)
 	machine = db.Column(db.String(255), nullable=False)
 
 
@@ -26,10 +27,13 @@ class Job(db.Model):
 
 
 	def serialize(self):
-		return {
+		as_dict = {
 			'id': self.id,
 			'instruction': self.instruction,
 			'status': self.status.value,
 			'last_modified': self.last_modified,
-			'machine_id': self.machine
+			'machine_id': self.machine,
 		}
+		if self.runtime > 0: 
+			as_dict['runtime'] = self.runtime
+		return as_dict
