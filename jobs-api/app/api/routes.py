@@ -37,6 +37,24 @@ def job_done(index):
     return jsonify(job.serialize())
 
 
+@app.route('/job_start/<int:index>')
+def job_start(index):
+    job = Job.query.get(index)
+    if job is None:
+        return jsonify({})
+    if job.status == JobStatus.DOING or job.status == JobStatus.DONE:
+        return jsonify({})
+    if job.status == JobStatus.PENDING:
+        machine_id = request.args.get('machine', str(uuid.uuid4()))
+        job.status = JobStatus.DOING
+        job.machine = machine_id
+        now = datetime.utcnow()
+        job.last_modified = now
+        db.session.commit()
+
+    return jsonify(job.serialize())
+
+
 @app.route('/job_retry/<int:index>')
 def job_retry(index):
     job = Job.query.get(index)
