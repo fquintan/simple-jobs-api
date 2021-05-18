@@ -42,9 +42,9 @@ def job_start(index):
     job = Job.query.get(index)
     if job is None:
         return jsonify({})
-    if job.status == JobStatus.DOING or job.status == JobStatus.DONE:
+    if job.status == JobStatus.DONE:
         return jsonify({})
-    if job.status == JobStatus.PENDING:
+    if job.status == JobStatus.PENDING or job.status == JobStatus.DOING:
         machine_id = request.args.get('machine', str(uuid.uuid4()))
         job.status = JobStatus.DOING
         job.machine = machine_id
