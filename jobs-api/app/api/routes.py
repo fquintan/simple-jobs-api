@@ -143,3 +143,7 @@ def delete(index):
 @app.route('/')
 def index():
     return render_template('index.html', **{"greeting": "Hello from Flask!"})
+
+@app.route('/stats')
+def stats():
+    return render_template('stats.html', **{"greeting": "Hello from Flask!"})
