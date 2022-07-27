@@ -16,6 +16,18 @@ const vm = new Vue({ // Again, vm is our Vue instance's name for consistency.
 			doing: 0,
 			done: 0,
 			pending: 0
+		},
+		stats: {
+			total: {
+				id: 'total',
+				count: 0,
+				time: 0,
+			}
+		},
+		runtime: {
+			min_timestamp: 999999999999999,
+			max_timestamp: 0,
+			min_length: 0
 		}
 	},
 	mounted () {
@@ -42,6 +54,23 @@ const vm = new Vue({ // Again, vm is our Vue instance's name for consistency.
 						  this.counts['doing']++;
 						}
 						else if (job.status == 'DONE') {
+							if( ! this.stats[job.machine_id] ) {
+								this.stats[job.machine_id] = {
+									time: 0,
+									count: 0,
+									id: job.machine_id
+								}
+							}
+							this.stats[job.machine_id]['time'] += job.runtime;
+							this.stats[job.machine_id]['count']++;
+							this.stats.total['time'] += job.runtime;
+							this.stats.total['count']++;
+
+							timestamp = Date.parse(job.last_modified);
+							this.runtime.min_timestamp = Math.min( this.runtime.min_timestamp, timestamp );
+							if(this.runtime.min_timestamp == timestamp) this.runtime.min_length = job.runtime;
+							this.runtime.max_timestamp = Math.max( this.runtime.max_timestamp, timestamp );
+
 							hours = Math.floor(job.runtime / 3600)
 							minutes = Math.floor((job.runtime - (hours * 3600)) / 60);
 							seconds = job.runtime - (hours * 3600) - (minutes * 60);
@@ -63,6 +92,31 @@ const vm = new Vue({ // Again, vm is our Vue instance's name for consistency.
 					  this.percentage['pending'] = this.counts['pending'] * 100 / this.counts['total'];
 				  }
 			  }
+			  for (const machine in this.stats) {
+				var m = this.stats[machine];
+				if(m['count'] == 0) continue;
+				m['avg'] = Math.floor(m['time'] / m['count']);
+				hours = Math.floor(m['avg'] / 3600)
+				minutes = Math.floor((m['avg'] - (hours * 3600)) / 60);
+				seconds = m['avg'] - (hours * 3600) - (minutes * 60);
+				m['avg'] = hours.toString().padStart(2, '0') + ':' + 
+				minutes.toString().padStart(2, '0') + ':' + 
+				seconds.toString().padStart(2, '0');
+				this.stats[m['id']] = m;
+			  }
+
+			  if(this.runtime.max_timestamp) {
+				var delta = (this.runtime.max_timestamp - this.runtime.min_timestamp) / 1000 - this.runtime.min_length;
+
+				hours = Math.floor(delta / 3600)
+				minutes = Math.floor((delta - (hours * 3600)) / 60);
+				seconds = delta - (hours * 3600) - (minutes * 60);
+				delta = hours.toString().padStart(2, '0') + ':' + 
+				minutes.toString().padStart(2, '0') + ':' + 
+				seconds.toString().padStart(2, '0');
+				this.runtime['runtime_text'] = delta;
+			  }
+
 		  })
 	  },
 	  methods: {
