@@ -2,6 +2,7 @@ from app import app, db
 from flask import jsonify, render_template, request
 from app.models.Job import Job, JobStatus
 from flask_sqlalchemy import functools
+from sqlalchemy import func
 import uuid
 from datetime import datetime
 
@@ -139,6 +140,54 @@ def delete(index):
     db.session.delete(job)
     db.session.commit()
     return str(job_id)
+
+
+@app.route('/stats/')
+def get_stats():
+    totals = Job.query.with_entities(Job.status, func.count(Job.status)).group_by(Job.status).all()
+
+    totals = {s.value:n for s,n in totals}
+    counts = []
+    for s in JobStatus:
+        print(s.value)
+        if s.value not in totals:
+            counts.append({
+                'status': s.value,
+                'count': 0
+            })
+        else:
+            counts.append({
+                'status': s.value,
+                'count': int(totals[s.value])
+            })
+
+    runtimes = []
+    total_runtime = 0
+
+    if JobStatus.DONE.value in totals:
+        avg_per_machine = Job.query.with_entities(Job.machine, func.avg(Job.runtime)).filter_by(status=JobStatus.DONE).group_by(Job.machine).all()
+        runtimes = [{'machine_id':m, 'avg':int(a)} for m, a in avg_per_machine]
+
+        avg_runtime = Job.query.with_entities(func.avg(Job.runtime)).filter_by(status=JobStatus.DONE).one()
+        avg_runtime = int(avg_runtime[0])
+
+        runtimes.append({
+            'machine': 'total',
+            'avg': avg_runtime
+        })
+        
+        min_max = Job.query.with_entities(func.min(Job.last_modified), func.max(Job.last_modified)).filter_by(status=JobStatus.DONE).one()
+
+        if min_max[0] is not None and min_max[1] is not None:
+            total_runtime = (min_max[1] - min_max[0]).total_seconds() + avg_runtime
+            
+
+    return jsonify({
+        'counts': counts,
+        'runtimes': runtimes,
+        'total_runtime': total_runtime
+    })
+
 
 @app.route('/')
 def index():
