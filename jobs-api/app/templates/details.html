@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+    <title>Jobs API</title>
+  </head>
+  <body>
+	    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+	<!-- The id 'vm' is just for consistency - it can be anything you want -->
+    </div>
+    <div id="vm">
+      <div class="row">
+        <div class="col-sm-10">
+          <div v-if="counts['total']" class="progress">
+            <div class="progress-bar bg-warning" role="progressbar" v-bind:style="{width: percentage['doing']+'%'}">
+              Doing
+            </div>
+            <div class="progress-bar bg-done" role="progressbar" v-bind:style="{width: percentage['done']+'%'}">
+              Done
+            </div>
+            <div class="progress-bar bg-secondary" role="progressbar" v-bind:style="{width: percentage['pending']+'%'}">
+              Pending
+            </div>
+          </div>
+          <div>
+            <ul class="nav nav-tabs" id="myTabs">
+              <li class="nav-item">
+                <a class="nav-link" href="/">Stats</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/details">Details</a>
+              </li>
+            </ul>
+          </div>
+
+          <h1>Doing [[ counts['doing'] ]]</h1>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Instruction</th>
+                <th scope="col">Status</th>
+                <th scope="col">Machine</th>
+                <th scope="col">Runtime</th>
+                <th scope="col">Last Modified</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="job in jobs_doing">
+                <td>[[ job.id ]]</td>
+                <td>[[ job.instruction ]]</td>
+                <td>[[ job.status ]]</td>
+                <td>[[ job.machine_id ]]</td>
+                <td>[[ job.runtime ]]</td>
+                <td>[[ job.last_modified ]]</td>
+                <td>
+                  <div class="btn-group" role="group">
+                    <button v-on:click="retry(job.id)" type="button" class="btn btn-warning btn-sm">Release</button>
+                    <button v-on:click="delete_job(job.id)" type="button" class="btn btn-danger btn-sm">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h1>Pending [[ counts['pending'] ]]</h1>
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#basicExampleModal">
+            Add Jobs
+          </button>
+          
+          <!-- Modal -->
+          <div class="modal fade" id="basicExampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Add Jobs</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+                    <label for="exampleFormControlTextarea1">Instructions</label>
+                    <textarea class="form-control" id="add-form-instructions" rows="5"></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                  <button v-on:click="add_jobs()" type="button" data-dismiss="modal" class="btn btn-primary">Ok</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Instruction</th>
+                <th scope="col">Status</th>
+                <th scope="col">Last Modified</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="job in jobs_pending">
+                <td>[[ job.id ]]</td>
+                <td>[[ job.instruction ]]</td>
+                <td>[[ job.status ]]</td>
+                <td>[[ job.last_modified ]]</td>
+                <td>
+                  <div class="btn-group" role="group">
+                    <button v-on:click="delete_job(job.id)" type="button" class="btn btn-danger btn-sm">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h1>Done [[ counts['done'] ]]</h1>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Instruction</th>
+                <th scope="col">Status</th>
+                <th scope="col">Machine</th>
+                <th scope="col">Runtime</th>
+                <th scope="col">Last Modified</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="job in jobs_done">
+                <td>[[ job.id ]]</td>
+                <td>[[ job.instruction ]]</td>
+                <td>[[ job.status ]]</td>
+                <td>[[ job.machine_id ]]</td>
+                <td>[[ job.runtime ]]</td>
+                <td>[[ job.last_modified ]]</td>
+                <td>
+                  <div class="btn-group" role="group">
+                    <button v-on:click="delete_job(job.id)" type="button" class="btn btn-danger btn-sm">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        
+
+        </div>
+      </div>
+    </div>
+
+
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<script src="{{ url_for('static', filename='details.js') }}"></script>
+  
+	</body>
+	
+</html>

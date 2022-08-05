@@ -130,6 +130,14 @@ def status(index):
     
     return jsonify(job.serialize())
 
+@app.route('/status_doing/')
+def status_doing():
+    jobs = Job.query.filter_by(status=JobStatus.DOING).all()
+    resp = {}
+    for job in jobs:
+        resp[job.id] = job.serialize()
+    return jsonify(resp)
+
 
 @app.route('/delete/<int:index>')
 def delete(index):
@@ -149,17 +157,10 @@ def get_stats():
     totals = {s.value:n for s,n in totals}
     counts = []
     for s in JobStatus:
-        print(s.value)
-        if s.value not in totals:
-            counts.append({
-                'status': s.value,
-                'count': 0
-            })
-        else:
-            counts.append({
-                'status': s.value,
-                'count': int(totals[s.value])
-            })
+        counts.append({
+            'status': s.value,
+            'count': totals.get(s.value, 0)
+        })
 
     runtimes = []
     total_runtime = 0
@@ -172,7 +173,7 @@ def get_stats():
         avg_runtime = int(avg_runtime[0])
 
         runtimes.append({
-            'machine': 'total',
+            'machine_id': 'total',
             'avg': avg_runtime
         })
         
@@ -187,6 +188,11 @@ def get_stats():
         'runtimes': runtimes,
         'total_runtime': total_runtime
     })
+
+
+@app.route('/details/')
+def details():
+    return render_template('details.html', **{"greeting": "Hello from Flask!"})
 
 
 @app.route('/')
