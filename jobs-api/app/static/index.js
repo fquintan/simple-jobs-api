@@ -1,4 +1,4 @@
-const API_URL = 'http://jobs-api.felipequintanilla.cl'
+const API_URL = 'https://jobs-api.felipequintanilla.cl'
 const vm = new Vue({ // Again, vm is our Vue instance's name for consistency.
     el: '#vm',
     delimiters: ['[[', ']]'],
